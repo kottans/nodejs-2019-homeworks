@@ -59,7 +59,7 @@ with then() method`
 };
 
 const dns = require("dns").promises;
-const Socket = require("et").Socket;
+const Socket = require("net").Socket;
 
 function* twister() {
     let symbols = ["|", "/", "-", "\\"];
@@ -83,18 +83,16 @@ function isInvalidPortsRange(portsRange) {
     || +portsRange[1] < 1 || +portsRange[1] > 65535;
 }
 
-async function parseHost(hostName) {
-    let host = "";
-    if (isIpAddress(hostName)) {
+async function parseHost(host) {
+    if (isIpAddress(host)) {
         try {
-            host = (await dns.lookup(hostName)).address;
+            return (await dns.lookup(host)).address;
         } catch (err) {
             throw "Hostname can not be resolved";
         }
     } else {
-        host = hostName;
+        return host;
     }
-    return host;
 }
 
 function parsePorts(ports) {
@@ -136,46 +134,43 @@ async function parseArguments(args) {
     return {host, ports};
 }
 
+async function checkPort(host, port) {
+    return new Promise((resolve) => {
+        const socket = new Socket();
+        socket.setTimeout(300);
+        socket.on("connect", () => {
+            socket.destroy();
+            resolve(true);
+        });
+        socket.on("timeout", () => {
+            socket.destroy();
+            resolve(false);
+        });
+        socket.on("error", () => {
+            socket.destroy();
+            resolve(false);
+        });
+        socket.connect(port, host);
+    });
+}
+
 async function scan(host, ports, args = {silent:false, module:false}) {
     let openPorts = [];
-    let tw = twister();
+    const tw = twister();
+    const scanAddress = checkPort.bind(undefined, host);
     process.stdout.write("scanning ");
     for (let port = +ports[0]; port < ports[1]; ++port) {
         process.stdout.write(`${tw.next().value}\b`);
-        try {
-            await new Promise((resolve, reject) => {
-                let socket = new Socket();
-                socket.setTimeout(300);
-                socket.on("connect", () => {
-                    process.stdout.write(". ");
-                    openPorts.push(port);
-                    socket.destroy();
-                    resolve();
-                });
-                socket.on("timeout", () => {
-                    socket.destroy();
-                    reject();
-                });
-                socket.on("error", () => {
-                    socket.destroy();
-                    reject();
-                });
-                socket.connect(port, host);
-            });
-        } catch (err) {
-            
+        if (await scanAddress(port)) {
+            openPorts.push(port);
+            process.stdout.write(". ");
         }
     }
 
     if (!args.silent || !args.module) {
-        let result = "";
-        if (openPorts.length) {
-            result = `Port${openPorts.length > 1 ? "s" : ""} ${openPorts.join(", ")} ${openPorts.length > 1 ? "are" : "is"}`;
-        } else {
-            result = "No ports are";
-        }
-
-        console.log(` \n${result} open`);
+        console.log(` \n${openPorts.length
+            ? `Port${openPorts.length > 1 ? "s" : ""} ${openPorts.join(", ")} ${openPorts.length > 1 ? "are" : "is"}`
+            : "No ports are"} open`);
     }
 
     if (args.module) return openPorts;
@@ -192,6 +187,8 @@ if (process.argv.includes("--help")) {
     try {
         parseArguments(process.argv.slice(2)).then((result) => scan(result.host, result.ports));
     } catch (err) {
+        console.log(err);
+        console.log("\n**********\n");
         console.log(help.script);
     }
 }
