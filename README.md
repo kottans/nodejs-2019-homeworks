@@ -27,7 +27,7 @@ This repo was created for students to submit their homeworks for review.
   - push feature branch to your remote repository: `git push --set-upstream origin port-sniffer`
   - make pull-request from your repository to this repository via GitHub web-interface
 - post a link to your subtask PR in the
-     [FE Questionarium chat](https://t.me/joinchat/DqrdixM_mjurcmQkkQ11Og)
+     [BE Questionarium chat](https://t.me/joinchat/DqrdixM_mjurcmQkkQ11Og)
      and ask mentors for a code review
      * wait for review from course mentors
      * if necessary, make changes, until your code will be approved and merged
