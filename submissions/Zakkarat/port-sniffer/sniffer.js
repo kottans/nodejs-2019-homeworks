@@ -104,11 +104,6 @@ const sniff = async ({ host, port, help }) => {
   }
   const hostPort = await checkValid(host, port);
   const openPorts = await checkConnection(hostPort);
-  if (hostPort.every(elem => elem)) {
-
-  } else {
-    return 0;
-  }
   openPorts.length ? console.log(`\n${openPorts.join(', ')} ports are opened`) : console.log(`No ports opened`)
 };
 
