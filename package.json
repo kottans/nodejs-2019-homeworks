@@ -1,0 +1,54 @@
+{
+  "name": "nodejs-2019-homeworks",
+  "version": "1.0.0",
+  "description": "[![MIT Licensed][icon-mit]][license]\r [![Kottans-Backend][icon-kottans-be]][kottans-backend]\r &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\r [![Telegram][icon-chat]][chat]",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:js": "eslint ./submissions",
+    "lint-staged": "lint-staged"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kottans/nodejs-2019-homeworks.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kottans/nodejs-2019-homeworks/issues"
+  },
+  "homepage": "https://github.com/kottans/nodejs-2019-homeworks#readme",
+  "devDependencies": {
+    "eslint": "^6.5.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-config-prettier": "^6.3.0",
+    "eslint-plugin-import": "^2.18.2",
+    "lint-staged": "^9.4.0",
+    "pre-commit": "^1.2.2",
+    "prettier": "1.18.2"
+  },
+  "eslintConfig": {
+    "env": {
+      "node": true,
+      "es6": true
+    },
+    "extends": [
+      "airbnb-base",
+      "prettier"
+    ],
+    "parserOptions": {
+      "ecmaVersion": 2018,
+      "sourceType": "script"
+    },
+    "rules": {}
+  },
+  "prettier": {
+    "semi": true,
+    "singleQuote": true
+  },
+  "pre-commit": "lint-staged",
+  "lint-staged": {
+    "*.js": "eslint"
+  }
+}
