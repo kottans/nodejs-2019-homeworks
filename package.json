@@ -41,7 +41,9 @@
       "ecmaVersion": 2018,
       "sourceType": "script"
     },
-    "rules": {}
+    "rules": {
+      "prettier/prettier": "error"
+    }
   },
   "prettier": {
     "semi": true,
