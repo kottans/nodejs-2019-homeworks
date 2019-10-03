@@ -1,9 +1,13 @@
-#!/usr/bin/env node
+/* eslint-disable consistent-return */
+/* eslint-disable no-return-await */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-console */
+/* eslint-disable no-plusplus */
+/* eslint-disable no-throw-literal */
 
-"use strict";
 
 const help = {
-    script:`Simple port sniffer
+  script: `Simple port sniffer
 
 This is a simple port sniffer, which can be called as command line script or imported as a module.
 When used from command line it takes 2 named paramentes:
@@ -30,7 +34,7 @@ after import you can perform scan by calling sniffer.scan()
 sniffer.scan(host[, portString][, args])
 
 For detailed disambiguation on the function call sniffer.help()`,
-    function: `Simple port scanning method
+  function: `Simple port scanning method
 
 This is an async function for port scanning. It takes one obligatory argument 'host' and two
 optional arguments 'portString', and additional arguments object 'args' with 'module' and
@@ -55,140 +59,139 @@ args:Object
                     to 'true'
 
 The function is async and returns a promice. You shoud eather use it with await operator or
-with then() method`
+with then() method`,
 };
 
-const dns = require("dns").promises;
-const Socket = require("net").Socket;
+const dns = require('dns').promises;
+const { Socket } = require('net');
 
 function* twister() {
-    let symbols = ["|", "/", "-", "\\"];
-    let current = 0;
-    while (true) {
-        if (current == 4) current = 0;
-        yield symbols[current++];
-    }
+  const symbols = ['|', '/', '-', '\\'];
+  let current = 0;
+  while (true) {
+    if (current === 4) current = 0;
+    yield symbols[current++];
+  }
 }
 
 function isIpAddress(address) {
-    return address.search(/^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/) == -1;
+  return address.search(/^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/) === -1;
 }
 
 function isRange(ip) {
-    return ip.search(/^\d{1,4}-\d{1,4}$/) == -1;
+  return ip.search(/^\d{1,4}-\d{1,4}$/) === -1;
 }
 
 function isInvalidPortsRange(portsRange) {
-    return +portsRange[0] >= +portsRange[1] || +portsRange[0] < 1 || +portsRange[0] > 65535
+  return +portsRange[0] >= +portsRange[1] || +portsRange[0] < 1 || +portsRange[0] > 65535
     || +portsRange[1] < 1 || +portsRange[1] > 65535;
 }
 
 async function parseHost(host) {
-    if (isIpAddress(host)) {
-        try {
-            return (await dns.lookup(host)).address;
-        } catch (err) {
-            throw "Hostname can not be resolved";
-        }
-    } else {
-        return host;
+  if (isIpAddress(host)) {
+    try {
+      return (await dns.lookup(host)).address;
+    } catch (err) {
+      throw 'Hostname can not be resolved';
     }
+  } else {
+    return host;
+  }
 }
 
 function parsePorts(ports) {
-    if (isRange(ports)) {
-        throw "Invalid port range argument";
+  if (isRange(ports)) {
+    throw 'Invalid port range argument';
+  } else {
+    const limits = ports.split('-');
+    if (isInvalidPortsRange(limits)) {
+      throw 'Port numbers out of range';
     } else {
-        let limits = ports.split("-");
-        if (isInvalidPortsRange(limits)) {
-            throw "Port numbers out of range";
-        } else {
-            limits[1]++;
-            return limits;
-        }
+      limits[1]++;
+      return limits;
     }
+  }
 }
 
 async function parseArguments(args) {
-    let host = "";
-    let ports = [1, 65536];
-    let hostIndex = args.indexOf("--host") + 1;
-    if (hostIndex == 0 || hostIndex == args.length) {
-        throw "You must specify a host to scan ports";
+  let host = '';
+  let ports = [1, 65536];
+  const hostIndex = args.indexOf('--host') + 1;
+  if (hostIndex === 0 || hostIndex === args.length) {
+    throw 'You must specify a host to scan ports';
+  } else {
+    host = await parseHost(args[hostIndex]);
+  }
+  const portsIndex = args.indexOf('--ports') + 1;
+  if (portsIndex !== 0) {
+    if (portsIndex === args.length) {
+      console.log('Invalis ports specified, setting to default (1-65535)');
     } else {
-        host = await parseHost(args[hostIndex]);
+      try {
+        ports = parsePorts(args[portsIndex]);
+      } catch (err) {
+        console.log('Invalid ports specified, setting to default(1-65535)');
+      }
     }
-    let portsIndex = args.indexOf("--ports") + 1;
-    if (portsIndex != 0) {
-        if (portsIndex == args.length) {
-            console.log("Invalis ports specified, setting to default (1-65535)");
-        } else {
-            try {
-                ports = parsePorts(args[portsIndex]);
-            } catch (err) {
-                console.log("Invalid ports specified, setting to default(1-65535)");
-            }
-        }
-    }
+  }
 
-    return {host, ports};
+  return { host, ports };
 }
 
 async function checkPort(host, port) {
-    return new Promise((resolve) => {
-        const socket = new Socket();
-        socket.setTimeout(300);
-        socket.on("connect", () => {
-            socket.destroy();
-            resolve(true);
-        });
-        socket.on("timeout", () => {
-            socket.destroy();
-            resolve(false);
-        });
-        socket.on("error", () => {
-            socket.destroy();
-            resolve(false);
-        });
-        socket.connect(port, host);
+  return new Promise((resolve) => {
+    const socket = new Socket();
+    socket.setTimeout(300);
+    socket.on('connect', () => {
+      socket.destroy();
+      resolve(true);
     });
+    socket.on('timeout', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.on('error', () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.connect(port, host);
+  });
 }
 
-async function scan(host, ports, args = {silent:false, module:false}) {
-    let openPorts = [];
-    const tw = twister();
-    const scanAddress = checkPort.bind(undefined, host);
-    process.stdout.write("scanning ");
-    for (let port = +ports[0]; port < ports[1]; ++port) {
-        process.stdout.write(`${tw.next().value}\b`);
-        if (await scanAddress(port)) {
-            openPorts.push(port);
-            process.stdout.write(". ");
-        }
+async function scan(host, ports, args = { silent: false, module: false }) {
+  const openPorts = [];
+  const tw = twister();
+  const scanAddress = checkPort.bind(undefined, host);
+  process.stdout.write('scanning ');
+  for (let port = +ports[0]; port < ports[1]; ++port) {
+    process.stdout.write(`${tw.next().value}\b`);
+    if (await scanAddress(port)) {
+      openPorts.push(port);
+      process.stdout.write('. ');
     }
+  }
 
-    if (!args.silent || !args.module) {
-        console.log(` \n${openPorts.length
-            ? `Port${openPorts.length > 1 ? "s" : ""} ${openPorts.join(", ")} ${openPorts.length > 1 ? "are" : "is"}`
-            : "No ports are"} open`);
-    }
+  if (!args.silent || !args.module) {
+    console.log(` \n${openPorts.length
+      ? `Port${openPorts.length > 1 ? 's' : ''} ${openPorts.join(', ')} ${openPorts.length > 1 ? 'are' : 'is'}`
+      : 'No ports are'} open`);
+  }
 
-    if (args.module) return openPorts;
+  if (args.module) return openPorts;
 }
 
-module.exports.scan = async (host, ports = "", args = {module:true, silent:false}) =>
-    await scan(await parseHost(host), parsePorts(ports), args);
+module.exports.scan = async (host, ports = '', args = { module: true, silent: false }) => await scan(await parseHost(host), parsePorts(ports), args);
 
 module.exports.help = () => console.log(help.function);
 
-if (process.argv.includes("--help")) {
-    console.log(help.script);
+if (process.argv.includes('--help')) {
+  console.log(help.script);
 } else {
-    try {
-        parseArguments(process.argv.slice(2)).then((result) => scan(result.host, result.ports));
-    } catch (err) {
-        console.log(err);
-        console.log("\n**********\n");
-        console.log(help.script);
-    }
+  try {
+    parseArguments(process.argv.slice(2)).then((result) => scan(result.host, result.ports));
+  } catch (err) {
+    console.log(err);
+    console.log('\n**********\n');
+    console.log(help.script);
+  }
 }
