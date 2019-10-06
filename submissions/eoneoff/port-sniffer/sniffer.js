@@ -5,7 +5,6 @@
 /* eslint-disable no-plusplus */
 /* eslint-disable no-throw-literal */
 
-
 const help = {
   script: `Simple port sniffer
 
@@ -59,7 +58,7 @@ args:Object
                     to 'true'
 
 The function is async and returns a promice. You shoud eather use it with await operator or
-with then() method`,
+with then() method`
 };
 
 const dns = require('dns').promises;
@@ -75,7 +74,11 @@ function* twister() {
 }
 
 function isIpAddress(address) {
-  return address.search(/^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/) === -1;
+  return (
+    address.search(
+      /^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/
+    ) === -1
+  );
 }
 
 function isRange(ip) {
@@ -83,8 +86,13 @@ function isRange(ip) {
 }
 
 function isInvalidPortsRange(portsRange) {
-  return +portsRange[0] >= +portsRange[1] || +portsRange[0] < 1 || +portsRange[0] > 65535
-    || +portsRange[1] < 1 || +portsRange[1] > 65535;
+  return (
+    +portsRange[0] >= +portsRange[1] ||
+    +portsRange[0] < 1 ||
+    +portsRange[0] > 65535 ||
+    +portsRange[1] < 1 ||
+    +portsRange[1] > 65535
+  );
 }
 
 async function parseHost(host) {
@@ -139,7 +147,7 @@ async function parseArguments(args) {
 }
 
 async function checkPort(host, port) {
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     const socket = new Socket();
     socket.setTimeout(300);
     socket.on('connect', () => {
@@ -172,15 +180,25 @@ async function scan(host, ports, args = { silent: false, module: false }) {
   }
 
   if (!args.silent || !args.module) {
-    console.log(` \n${openPorts.length
-      ? `Port${openPorts.length > 1 ? 's' : ''} ${openPorts.join(', ')} ${openPorts.length > 1 ? 'are' : 'is'}`
-      : 'No ports are'} open`);
+    console.log(
+      ` \n${
+        openPorts.length
+          ? `Port${openPorts.length > 1 ? 's' : ''} ${openPorts.join(', ')} ${
+              openPorts.length > 1 ? 'are' : 'is'
+            }`
+          : 'No ports are'
+      } open`
+    );
   }
 
   if (args.module) return openPorts;
 }
 
-module.exports.scan = async (host, ports = '', args = { module: true, silent: false }) => await scan(await parseHost(host), parsePorts(ports), args);
+module.exports.scan = async (
+  host,
+  ports = '',
+  args = { module: true, silent: false }
+) => await scan(await parseHost(host), parsePorts(ports), args);
 
 module.exports.help = () => console.log(help.function);
 
@@ -188,7 +206,9 @@ if (process.argv.includes('--help')) {
   console.log(help.script);
 } else {
   try {
-    parseArguments(process.argv.slice(2)).then((result) => scan(result.host, result.ports));
+    parseArguments(process.argv.slice(2)).then(result =>
+      scan(result.host, result.ports)
+    );
   } catch (err) {
     console.log(err);
     console.log('\n**********\n');
