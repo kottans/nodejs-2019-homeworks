@@ -16,7 +16,7 @@ This repo was created for students to submit their homeworks for review.
   See example file structure you are expected to have below:
 
   ![File structure example](img/file-structure.png)
-
+- make sure your code conforms to [code quality rules](CODE_QUALITY.md)
 - make pull-request to this repository following these steps:
   - `git checkout master` and then create new branch, name it according to task performed (aka feature branch): `git checkout -b port-sniffer`. In this example feature branch is called `port-sniffer`
   - commit your changes to newly created feature branch
