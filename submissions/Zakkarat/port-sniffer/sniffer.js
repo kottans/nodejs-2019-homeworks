@@ -1,5 +1,8 @@
-const Net = require("net");
-const dns = require("dns").promises;
+/* eslint-disable no-param-reassign */
+/* eslint-disable no-plusplus */
+const Net = require('net');
+const dns = require('dns').promises;
+
 const args = process.argv.slice(2);
 const help = `
 This script used for finding open ports for specified host.
@@ -23,95 +26,107 @@ Paramaters:
 
 const checkHost = async host => {
   if (!host) {
-    console.log("No host specified. Use --help for more information.");
+    console.log('No host specified. Use --help for more information.');
   }
-  return await dns
+  const dnsAnswer = await dns
     .lookup(host)
     .then(res => {
       return res.address;
     })
-    .catch(error => {
-      console.log("Invalid hostname. Use --help for more information.");
+    .catch(() => {
+      console.log('Invalid hostname. Use --help for more information.');
     });
+  return dnsAnswer;
 };
 
 const checkPorts = port => {
   let portLimits = [1, 65535];
   if (port) {
-    portLimits = port.split("-").map(elem => Number(elem));
-    if (1 > portLimits[0] || 65535 < portLimits[1] || portLimits[2]) {
-      throw new Error("Invalid port range. Use --help for more information.");
+    portLimits = port.split('-').map(elem => Number(elem));
+    if (portLimits[0] < 1 || portLimits[1] > 65535 || portLimits[2]) {
+      throw new Error('Invalid port range. Use --help for more information.');
     }
   } else {
-    console.log("No port range specified. Setting to default. For more information try --help")
+    console.log(
+      'No port range specified. Setting to default. For more information try --help'
+    );
   }
   return portLimits;
 };
 
 const checkValid = async (host, port) => {
-  let address = await checkHost(host);
+  const address = await checkHost(host);
   let ports;
   try {
     ports = checkPorts(port);
-  } catch(e) {
+  } catch (e) {
     console.log(e);
     ports = [0];
   }
-  if([address, ...ports].every(elem => elem)) {
-  return [address, ...ports];
-  } else {
-    process.exit(1);
+  if ([address, ...ports].every(elem => elem)) {
+    return [address, ...ports];
   }
+  return process.exit(1);
+};
+
+const connectTo = async (host, port) => {
+  let isConnected;
+  await new Promise((resolve, reject) => {
+    const client = new Net.Socket();
+    client.setTimeout(300);
+    client.on('connect', () => {
+      process.stdout.write('.');
+      isConnected = true;
+      client.destroy();
+      resolve();
+    });
+    client.on('timeout', () => {
+      client.destroy();
+      reject();
+    });
+    client.on('error', () => {
+      client.destroy();
+      reject();
+    });
+    client.connect({
+      port,
+      host
+    });
+  }).catch(e => e);
+  if (isConnected) {
+    return port;
+  }
+  return null;
 };
 
 const checkConnection = async ([host, minPort, maxPort]) => {
-  const openPorts = [];
-    for (let i = minPort; i <= maxPort; i++) {
-    try {
-      await new Promise((resolve, reject) => {
-        const client = new Net.Socket();
-        client.setTimeout(300);
-        client.on("connect", () => {
-          process.stdout.write(".");
-          openPorts.push(i);
-          client.destroy();
-          resolve();
-        });
-        client.on("timeout", () => {
-          client.destroy();
-          reject();
-        });
-        client.on("error", () => {
-          client.destroy();
-          reject();
-        });
-        client.connect({
-          port: i,
-          host: host
-        });
-      });
-    } catch {}
+  let openPorts = [];
+  for (let i = minPort; i <= maxPort; i++) {
+    openPorts.push(connectTo(host, i));
   }
-  return openPorts;
-}
+  openPorts = await Promise.all(openPorts);
+  console.log(openPorts.filter(Boolean));
+  return openPorts.filter(Boolean);
+};
 
-const sniff = async ({ host, port, help }) => {
-  if (help) {
+const sniff = async ({ host, port, helped }) => {
+  if (helped) {
     return 0;
-  } else if (!host && !port) {
-    console.log("No arguments specified. Try --help for more information.");
+  }
+  if (!host && !port) {
+    console.log('No arguments specified. Try --help for more information.');
     return 0;
   }
   const hostPort = await checkValid(host, port);
   const openPorts = await checkConnection(hostPort);
-  openPorts.length ? console.log(`\n${openPorts.join(', ')} ports are opened`) : console.log(`No ports opened`)
+  return openPorts.length
+    ? console.log(`\n${openPorts.join(', ')} ports are opened`)
+    : console.log(`No ports opened`);
 };
-
-
 
 sniff(
   args.reduce((obj, elem, i) => {
-    if (elem === "--help") {
+    if (elem === '--help') {
       console.log(help);
       obj.help = true;
     } else if (i % 2 === 0) {
