@@ -71,7 +71,7 @@ function wrongContentType(response) {
 module.exports.dataHandler = (stack, list) => {
   return function(request, response) {
     const structureType = request.url.split('/')[1];
-    if (request.method === 'GET') {
+    if (request.method === 'GET' && structureType === 'list') {
       getList(response, list);
     } else if (request.method === 'POST' || request.method === 'DELETE') {
       if (isJson(request)) {
