@@ -1,6 +1,5 @@
 [![MIT Licensed][icon-mit]][license]
 [![Kottans-Backend][icon-kottans-be]][kottans-backend]
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 [![Telegram][icon-chat]][chat]
 
 #  NodeJS 2019 course homeworks
