@@ -68,6 +68,33 @@ function wrongContentType(response) {
   response.end();
 }
 
+function parseJsonRequest(request, response, stack, list, data, structureType) {
+  if (isValidType(data.data)) {
+    switch (structureType) {
+      case 'stack':
+        if (request.method === 'POST') {
+          postStack(response, stack, data);
+        }
+        break;
+      case 'list':
+        switch (request.method) {
+          case 'POST':
+            postList(response, list, data);
+            break;
+          case 'DELETE':
+            deleteList(response, list, data);
+            break;
+        }
+        break;
+      default:
+        notFound(response);
+        break;
+    }
+  } else {
+    wrongDataType(response);
+  }
+}
+
 module.exports.dataHandler = (stack, list) => {
   return function(request, response) {
     const structureType = request.url.split('/')[1];
@@ -79,30 +106,7 @@ module.exports.dataHandler = (stack, list) => {
         request.on('data', chunk => (body += chunk.toString()));
         request.on('end', () => {
           const data = JSON.parse(body);
-          if (isValidType(data.data)) {
-            switch (structureType) {
-              case 'stack':
-                if (request.method === 'POST') {
-                  postStack(response, stack, data);
-                }
-                break;
-              case 'list':
-                switch (request.method) {
-                  case 'POST':
-                    postList(response, list, data);
-                    break;
-                  case 'DELETE':
-                    deleteList(response, list, data);
-                    break;
-                }
-                break;
-              default:
-                notFound(response);
-                break;
-            }
-          } else {
-            wrongDataType(response);
-          }
+          parseJsonRequest(request, response, stack, list, data, structureType);
         });
       } else if (structureType === 'stack' && request.method === 'DELETE') {
         deleteStack(response, stack);
