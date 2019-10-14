@@ -18,7 +18,7 @@ module.exports.LinkedList = class LinkedList {
   }
 
   insert(value, successor = null) {
-    if (successor && this._root.value !== value) {
+    if (successor && this._root.value !== successor) {
       for (const node of this) {
         if (node.next && node.next.value === successor) {
           node.next = new Node(value, node.next);
