@@ -42,18 +42,18 @@ const validHost = async host => {
   }
 };
 
+const checkRangePort = port => {
+  if (port[0] < 0 || port[1] > 65535 || port[2] || port[0] > port[1]) {
+    process.stdout.write('Invalid port range. See help \n');
+    return false;
+  }
+  return true;
+};
+
 const validatorForPort = port => {
   let validPort = [1, 65535];
-  if (port) {
-    validPort = port.split('-').map(el => Number(el));
-    if (
-      validPort[0] < 0 ||
-      validPort[1] > 65535 ||
-      validPort[2] ||
-      validPort[0] > validPort[1]
-    ) {
-      throw new Error('Invalid port range. See help \n');
-    }
+  if (port && checkRangePort(port)) {
+    validPort = port;
   } else {
     process.stdout.write(
       'No port range specified. Setting to default. For more information try --help \n'
@@ -82,7 +82,9 @@ const checkConnection = async (port, host) => {
       reject();
     });
     socket.connect(port, host);
-  }).catch(e => e);
+  }).catch(e => {
+    if (e !== undefined) process.stdout.write(e);
+  });
   if (flag) {
     return port;
   }
@@ -98,9 +100,9 @@ const findOpenPorts = async (ports, host) => {
   return openPorts.filter(Boolean);
 };
 
-const sniffer = async ({ host, port, helpFlag }) => {
+const sniffer = async ({ helpFlag, port, host }) => {
   if (helpFlag) {
-    return 0;
+    process.stdout.write(help);
   }
   if (!host && !port) {
     process.stdout.write('No arguments. Try node sniffer.js --help. \n');
@@ -122,18 +124,18 @@ const sniffer = async ({ host, port, helpFlag }) => {
 };
 
 const parseArgs = () => {
-  const obj = {
-    help: false
+  const objWithInputData = {
+    helpFlag: false
   };
   if (args.indexOf('--help') !== -1) {
-    process.stdout.write(help);
-    obj.help = true;
+    objWithInputData.helpFlag = true;
   }
   const indexPort = args.indexOf('--ports');
-  if (indexPort !== -1) obj.port = args[indexPort + 1];
+  if (indexPort !== -1)
+    objWithInputData.port = args[indexPort + 1].split('-').map(Number);
   const indexHost = args.indexOf('--host');
-  if (indexHost !== -1) obj.host = args[indexHost + 1];
-  return obj;
+  if (indexHost !== -1) objWithInputData.host = args[indexHost + 1];
+  return objWithInputData;
 };
 
 sniffer(parseArgs());
