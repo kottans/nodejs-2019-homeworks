@@ -68,7 +68,25 @@ function wrongContentType(response) {
   response.end();
 }
 
-function parseJsonRequest(request, response, stack, list, data, structureType) {
+function handleListOperation(request, response, list, data) {
+  switch (request.method) {
+    case 'POST':
+      postList(response, list, data);
+      break;
+    case 'DELETE':
+      deleteList(response, list, data);
+      break;
+  }
+}
+
+function handleJsonRequest(
+  request,
+  response,
+  stack,
+  list,
+  data,
+  structureType
+) {
   if (isValidType(data.data)) {
     switch (structureType) {
       case 'stack':
@@ -77,14 +95,7 @@ function parseJsonRequest(request, response, stack, list, data, structureType) {
         }
         break;
       case 'list':
-        switch (request.method) {
-          case 'POST':
-            postList(response, list, data);
-            break;
-          case 'DELETE':
-            deleteList(response, list, data);
-            break;
-        }
+        handleListOperation(request, response, list, data);
         break;
       default:
         notFound(response);
@@ -106,7 +117,14 @@ module.exports.dataHandler = (stack, list) => {
         request.on('data', chunk => (body += chunk.toString()));
         request.on('end', () => {
           const data = JSON.parse(body);
-          parseJsonRequest(request, response, stack, list, data, structureType);
+          handleJsonRequest(
+            request,
+            response,
+            stack,
+            list,
+            data,
+            structureType
+          );
         });
       } else if (structureType === 'stack' && request.method === 'DELETE') {
         deleteStack(response, stack);
