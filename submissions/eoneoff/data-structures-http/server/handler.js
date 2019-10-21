@@ -1,5 +1,5 @@
 /* eslint-disable default-case */
-/* eslint-disable no-return-assign */
+
 /* eslint-disable func-names */
 
 function isValidType(value) {
@@ -114,7 +114,9 @@ module.exports.dataHandler = (stack, list) => {
     } else if (request.method === 'POST' || request.method === 'DELETE') {
       if (isJson(request)) {
         let body = '';
-        request.on('data', chunk => (body += chunk.toString()));
+        request.on('data', chunk => {
+          body += chunk.toString();
+        });
         request.on('end', () => {
           const data = JSON.parse(body);
           handleJsonRequest(
