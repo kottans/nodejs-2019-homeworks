@@ -27,9 +27,7 @@ const validHost = async host => {
   try {
     return await dns
       .lookup(host)
-      .then(res => {
-        return res.address;
-      })
+      .then(({ address }) => address)
       .catch(error => {
         process.stdout.write(
           `Invalit host name. ${error}. Try node sniffer.js --help \n`
@@ -44,16 +42,19 @@ const validHost = async host => {
 
 const checkRangePort = port => {
   if (port[0] < 0 || port[1] > 65535 || port[2] || port[0] > port[1]) {
-    process.stdout.write('Invalid port range. See help \n');
     return false;
   }
   return true;
 };
 
-const validatorForPort = port => {
+const validatorForPort = portRange => {
   let validPort = [1, 65535];
-  if (port && checkRangePort(port)) {
-    validPort = port;
+  if (portRange) {
+    if (checkRangePort(portRange)) {
+      validPort = portRange;
+    } else {
+      process.stdout.write('Invalid port range. See help \n');
+    }
   } else {
     process.stdout.write(
       'No port range specified. Setting to default. For more information try --help \n'
@@ -63,41 +64,32 @@ const validatorForPort = port => {
 };
 
 const checkConnection = async (port, host) => {
-  let flag = false;
-  await new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     const socket = new net.Socket();
     socket.setTimeout(300);
     socket.on('connect', () => {
       process.stdout.write('.');
-      flag = true;
+      resolve(port);
       socket.destroy();
-      resolve();
     });
     socket.on('timeout', () => {
+      resolve(false);
       socket.destroy();
-      reject();
     });
     socket.on('error', () => {
+      resolve(false);
       socket.destroy();
-      reject();
     });
     socket.connect(port, host);
-  }).catch(e => {
-    if (e !== undefined) process.stdout.write(e);
   });
-  if (flag) {
-    return port;
-  }
-  return null;
 };
 
 const findOpenPorts = async (ports, host) => {
-  let openPorts = [];
+  const openPorts = [];
   for (let i = ports[0]; i <= ports[1]; i += 1) {
     openPorts.push(checkConnection(i, host));
   }
-  openPorts = await Promise.all(openPorts);
-  return openPorts.filter(Boolean);
+  return Promise.all(openPorts).then(values => values.filter(Number.isFinite));
 };
 
 const sniffer = async ({ helpFlag, port, host }) => {
