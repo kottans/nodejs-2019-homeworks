@@ -45,7 +45,9 @@
       "ecmaVersion": 2018,
       "sourceType": "script"
     },
-    "plugins": ["prettier"],
+    "plugins": [
+      "prettier"
+    ],
     "rules": {
       "prettier/prettier": "error"
     }
@@ -57,5 +59,9 @@
   "pre-commit": "lint-staged",
   "lint-staged": {
     "*.js": "eslint"
+  },
+  "dependencies": {
+    "async": "^3.1.0",
+    "commander": "^3.0.2"
   }
 }
