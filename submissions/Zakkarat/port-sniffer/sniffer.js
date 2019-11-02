@@ -1,5 +1,6 @@
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-plusplus */
+/* eslint-disable no-console */
 const Net = require('net');
 const dns = require('dns').promises;
 
