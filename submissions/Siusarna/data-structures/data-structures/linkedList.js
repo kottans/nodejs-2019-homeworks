@@ -2,10 +2,37 @@
 
 const Node = require('./Element.js');
 
+function getSuccessorNode(prevNode, successor) {
+  let successorNode = prevNode;
+  if (!successor) {
+    return successorNode;
+  }
+  // successor value saved in prevNode or prevNode._next() so we check these node
+  if (prevNode.getValue() === successor) {
+    successorNode = prevNode;
+  } else if (prevNode.getNext()) {
+    successorNode = prevNode.getNext();
+  } else {
+    throw new Error('not found this successor');
+  }
+  return successorNode;
+}
+
 module.exports = class LinkedList {
   constructor() {
     this._head = null;
     this._size = 0;
+  }
+
+  searchForPrevNode(inputValue) {
+    let iteratorNode = this._head;
+    while (
+      iteratorNode.getNext() &&
+      iteratorNode.getNext().getValue() !== inputValue
+    ) {
+      iteratorNode = iteratorNode.getNext();
+    }
+    return iteratorNode;
   }
 
   insert(inputValue, successor = null) {
@@ -13,16 +40,10 @@ module.exports = class LinkedList {
       this._head = new Node(inputValue);
       this._size += 1;
     } else {
-      let iteratorNode = this._head;
-      while (iteratorNode.getNext() && iteratorNode.getValue() !== successor) {
-        iteratorNode = iteratorNode.getNext();
-      }
-      if (successor && iteratorNode.getValue() !== successor) {
-        throw new Error('not found successor');
-      }
-      const prevForInsertedNode = iteratorNode;
-      const currentNode = new Node(inputValue, prevForInsertedNode.getNext());
-      prevForInsertedNode.setNext(currentNode);
+      const prevNode = this.searchForPrevNode(successor);
+      const successorNode = getSuccessorNode(prevNode, successor);
+      const currentNode = new Node(inputValue, successorNode.getNext());
+      successorNode.setNext(currentNode);
       this._size += 1;
     }
   }
@@ -32,17 +53,10 @@ module.exports = class LinkedList {
       this._head = this._head.getNext();
       this._size -= 1;
     } else {
-      let iteratorNode = this._head;
-      while (
-        iteratorNode.getNext() &&
-        iteratorNode.getNext().getValue() !== inputValue
-      ) {
-        iteratorNode = iteratorNode.getNext();
-      }
-      if (iteratorNode.getNext()) {
-        const prevForRemovedNode = iteratorNode;
-        const nextForRemovedNode = prevForRemovedNode.getNext().getNext();
-        prevForRemovedNode.setNext(nextForRemovedNode);
+      const prevNodeForInputValue = this.searchForPrevNode(inputValue);
+      if (prevNodeForInputValue.getNext()) {
+        const nextForRemovedNode = prevNodeForInputValue.getNext().getNext();
+        prevNodeForInputValue.setNext(nextForRemovedNode);
         this._size -= 1;
       } else {
         throw new Error('not found this value');
@@ -54,12 +68,10 @@ module.exports = class LinkedList {
     let iteratorNode = this._head;
     const allValueInList = [];
     if (this._head) {
-      while (iteratorNode.getNext()) {
+      while (iteratorNode) {
         allValueInList.push(iteratorNode.getValue());
         iteratorNode = iteratorNode.getNext();
       }
-      const lastNode = iteratorNode;
-      allValueInList.push(lastNode.getValue());
     }
     return allValueInList.reverse();
   }
