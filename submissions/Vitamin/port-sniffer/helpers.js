@@ -13,14 +13,6 @@ const help = `
                              
         help       Show all commands.
 `;
-const compose = (...fns) => fns.reduce((f, g) => (...args) => f(g(...args)));
+const isDefined = value => value != null && value !== false;
 
-const composeAsync = (...fns) => async x => {
-  let res = x;
-  for (const fn of fns) {
-    res = await fn(res);
-  }
-  return res;
-};
-
-module.exports = { help, compose, composeAsync };
+module.exports = { help, isDefined };
