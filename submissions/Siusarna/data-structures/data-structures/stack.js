@@ -14,13 +14,13 @@ module.exports = class Stack {
   }
 
   pop() {
+    let removedValue;
     if (this._size) {
-      const removedValue = this._head.getValue();
+      removedValue = this._head.getValue();
       this._head = this._head.getNext() || null;
       this._size -= 1;
-      return removedValue;
     }
-    throw new Error('Stack is empty');
+    return removedValue;
   }
 
   getSize() {
