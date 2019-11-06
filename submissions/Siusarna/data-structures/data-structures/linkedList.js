@@ -38,30 +38,27 @@ module.exports = class LinkedList {
   insert(inputValue, successor = null) {
     if (this._head === null) {
       this._head = new Node(inputValue);
-      this._size += 1;
     } else {
       const prevNode = this.searchForPrevNode(successor);
       const successorNode = getSuccessorNode(prevNode, successor);
       const currentNode = new Node(inputValue, successorNode.getNext());
       successorNode.setNext(currentNode);
-      this._size += 1;
     }
+    this._size += 1;
   }
 
   remove(inputValue) {
     if (this._head.getValue() === inputValue) {
       this._head = this._head.getNext();
-      this._size -= 1;
     } else {
       const prevNodeForInputValue = this.searchForPrevNode(inputValue);
-      if (prevNodeForInputValue.getNext()) {
-        const nextForRemovedNode = prevNodeForInputValue.getNext().getNext();
-        prevNodeForInputValue.setNext(nextForRemovedNode);
-        this._size -= 1;
-      } else {
+      if (!prevNodeForInputValue.getNext()) {
         throw new Error('not found this value');
       }
+      const nextForRemovedNode = prevNodeForInputValue.getNext().getNext();
+      prevNodeForInputValue.setNext(nextForRemovedNode);
     }
+    this._size -= 1;
   }
 
   show() {
