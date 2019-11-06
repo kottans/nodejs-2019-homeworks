@@ -35,7 +35,7 @@ list.print = msg => {
 list.remove = data => {
   let a = list.data;
   let next;
-  next = a.next;
+  if (a.next) next = a.next;
   if (a.item === data) list.data = a.next;
   while (next && next.item !== data) {
     next = next.next;
