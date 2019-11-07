@@ -7,7 +7,7 @@ const async = require('async');
 let res = '';
 let completed = 0;
 
-function print(x) {
+function print (x) {
   if (x.length) process.stdout.write(x);
 }
 argumentParser
@@ -35,10 +35,10 @@ const endingPort = parseInt(
 
 print(`scaning ${argumentParser.host}:${startingPort}-${endingPort}`);
 
-function scanPorts({ port, host }) {
+function scanPorts ({ port, host }) {
   const client = new net.Socket();
 
-  function done(err, con) {
+  function done (err, con) {
     if (err) print(argumentParser.error);
 
     if (con) {
@@ -70,11 +70,12 @@ function scanPorts({ port, host }) {
     });
 }
 
-function sniffer(callback) {
+function sniffer (callback) {
   const q = async.queue(scanPorts, 65535);
-  for (let i = startingPort; i <= endingPort; i += 1)
+  for (let i = startingPort; i <= endingPort; i += 1) {
     q.push({ port: i, host: argumentParser.host });
-  callback('\nwell async done\n');
+  }
+  callback(new Error('\nwell async done\n'));
 }
 
 sniffer(print);

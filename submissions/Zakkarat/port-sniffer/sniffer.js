@@ -83,11 +83,11 @@ const connectTo = async (host, port) => {
     });
     client.on('timeout', () => {
       client.destroy();
-      reject();
+      reject(new Error('Timeout'));
     });
     client.on('error', () => {
       client.destroy();
-      reject();
+      reject(new Error('Unknown error'));
     });
     client.connect({
       port,
@@ -122,7 +122,7 @@ const sniff = async ({ host, port, helped }) => {
   const openPorts = await checkConnection(hostPort);
   return openPorts.length
     ? console.log(`\n${openPorts.join(', ')} ports are opened`)
-    : console.log(`No ports opened`);
+    : console.log('No ports opened');
 };
 
 sniff(

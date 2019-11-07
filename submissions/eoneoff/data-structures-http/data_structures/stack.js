@@ -3,17 +3,17 @@
 const { Node } = require('./node');
 
 module.exports.Stack = class Stack {
-  constructor() {
+  constructor () {
     this._root = null;
     this._length = 0;
   }
 
-  push(value) {
+  push (value) {
     this._root = new Node(value, this._root);
     this._length++;
   }
 
-  pop() {
+  pop () {
     let out = null;
     if (this._length) {
       out = this._root.value;
@@ -23,7 +23,7 @@ module.exports.Stack = class Stack {
     return out;
   }
 
-  get length() {
+  get length () {
     return this._length;
   }
 };

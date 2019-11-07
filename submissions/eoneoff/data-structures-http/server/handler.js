@@ -2,33 +2,33 @@
 
 /* eslint-disable func-names */
 
-function isValidType(value) {
+function isValidType (value) {
   return typeof value === 'string' || typeof value === 'number';
 }
 
-function isJson(request) {
+function isJson (request) {
   return request.headers['content-type'] === 'application/json';
 }
 
-function postStack(response, stack, data) {
+function postStack (response, stack, data) {
   stack.push(data.data);
   response.writeHead(200);
   response.end();
 }
 
-function deleteStack(response, stack) {
+function deleteStack (response, stack) {
   response.writeHead(200);
   response.end(JSON.stringify({ data: stack.pop() }), {
     'Content-Type': 'application/json'
   });
 }
 
-function getList(response, list) {
+function getList (response, list) {
   response.writeHead(200, { 'Content-Type': 'application/json' });
   response.end(JSON.stringify({ data: list.showList() }));
 }
 
-function postList(response, list, data) {
+function postList (response, list, data) {
   if (!data.successor || isValidType(data.successor)) {
     try {
       list.insert(data.data, data.successor);
@@ -42,7 +42,7 @@ function postList(response, list, data) {
   response.end();
 }
 
-function deleteList(response, list, data) {
+function deleteList (response, list, data) {
   try {
     list.remove(data.data);
     response.writeHead(200);
@@ -53,22 +53,22 @@ function deleteList(response, list, data) {
   }
 }
 
-function notFound(response) {
+function notFound (response) {
   response.writeHead(404, 'Url not found');
   response.end();
 }
 
-function wrongDataType(response) {
+function wrongDataType (response) {
   response.writeHead(400, 'Wrong data type');
   response.end();
 }
 
-function wrongContentType(response) {
+function wrongContentType (response) {
   response.writeHead(400, 'Wrong content type');
   response.end();
 }
 
-function handleListOperation(request, response, list, data) {
+function handleListOperation (request, response, list, data) {
   switch (request.method) {
     case 'POST':
       postList(response, list, data);
@@ -79,7 +79,7 @@ function handleListOperation(request, response, list, data) {
   }
 }
 
-function handleJsonRequest(
+function handleJsonRequest (
   request,
   response,
   stack,
@@ -107,7 +107,7 @@ function handleJsonRequest(
 }
 
 module.exports.dataHandler = (stack, list) => {
-  return function(request, response) {
+  return function (request, response) {
     const structureType = request.url.split('/')[1];
     if (request.method === 'GET' && structureType === 'list') {
       getList(response, list);
