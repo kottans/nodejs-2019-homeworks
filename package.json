@@ -8,6 +8,7 @@
     "lint:js": "eslint ./submissions",
     "lint-staged": "lint-staged",
     "install:void": ":",
+    "install:kissik/port-sniffer": "cd ./submissions/kissik/port-sniffer && yarn",
     "postinstall": "run-p install:**"
   },
   "repository": {
