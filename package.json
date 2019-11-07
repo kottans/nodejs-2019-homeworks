@@ -5,9 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "lint:js": "eslint ./submissions",
+    "lint:js": "eslint ./submissions --ignore-pattern **/node_modules/**",
     "lint-staged": "lint-staged",
     "install:void": ":",
+    "install:kissik/port-sniffer": "cd ./submissions/kissik/port-sniffer && yarn",
     "postinstall": "run-p install:**"
   },
   "repository": {
