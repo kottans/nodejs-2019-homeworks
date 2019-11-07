@@ -4,12 +4,12 @@
 const { Node } = require('./node');
 
 module.exports.LinkedList = class LinkedList {
-  constructor() {
+  constructor () {
     this._root = null;
     this._length = 0;
   }
 
-  *[Symbol.iterator]() {
+  * [Symbol.iterator] () {
     let current = this._root;
     while (current) {
       yield current;
@@ -17,7 +17,7 @@ module.exports.LinkedList = class LinkedList {
     }
   }
 
-  insert(value, successor = null) {
+  insert (value, successor = null) {
     if (successor && this._root.value !== successor) {
       for (const node of this) {
         if (node.next && node.next.value === successor) {
@@ -33,7 +33,7 @@ module.exports.LinkedList = class LinkedList {
     }
   }
 
-  remove(value) {
+  remove (value) {
     if (this._root.value === value) {
       this._root = this._root.next;
       this._length--;
@@ -49,11 +49,11 @@ module.exports.LinkedList = class LinkedList {
     }
   }
 
-  showList() {
+  showList () {
     return Array.from(this, node => node.value);
   }
 
-  get length() {
+  get length () {
     return this._length;
   }
 };

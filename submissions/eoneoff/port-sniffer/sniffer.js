@@ -64,7 +64,7 @@ with then() method`
 const dns = require('dns').promises;
 const { Socket } = require('net');
 
-function* twister() {
+function * twister () {
   const symbols = ['|', '/', '-', '\\'];
   let current = 0;
   while (true) {
@@ -73,7 +73,7 @@ function* twister() {
   }
 }
 
-function isIpAddress(address) {
+function isIpAddress (address) {
   return (
     address.search(
       /^((25[0-5]|2[0-4]\d|[01]?\d?\d)\.){3}(25[0-5]|2[0-4]\d|[01]?\d?\d)$/
@@ -81,11 +81,11 @@ function isIpAddress(address) {
   );
 }
 
-function isRange(ip) {
+function isRange (ip) {
   return ip.search(/^\d{1,4}-\d{1,4}$/) === -1;
 }
 
-function isInvalidPortsRange(portsRange) {
+function isInvalidPortsRange (portsRange) {
   return (
     +portsRange[0] >= +portsRange[1] ||
     +portsRange[0] < 1 ||
@@ -95,7 +95,7 @@ function isInvalidPortsRange(portsRange) {
   );
 }
 
-async function parseHost(host) {
+async function parseHost (host) {
   if (isIpAddress(host)) {
     try {
       return (await dns.lookup(host)).address;
@@ -107,7 +107,7 @@ async function parseHost(host) {
   }
 }
 
-function parsePorts(ports) {
+function parsePorts (ports) {
   if (isRange(ports)) {
     throw 'Invalid port range argument';
   } else {
@@ -121,7 +121,7 @@ function parsePorts(ports) {
   }
 }
 
-async function parseArguments(args) {
+async function parseArguments (args) {
   let host = '';
   let ports = [1, 65536];
   const hostIndex = args.indexOf('--host') + 1;
@@ -146,7 +146,7 @@ async function parseArguments(args) {
   return { host, ports };
 }
 
-async function checkPort(host, port) {
+async function checkPort (host, port) {
   return new Promise(resolve => {
     const socket = new Socket();
     socket.setTimeout(300);
@@ -166,7 +166,7 @@ async function checkPort(host, port) {
   });
 }
 
-async function scan(host, ports, args = { silent: false, module: false }) {
+async function scan (host, ports, args = { silent: false, module: false }) {
   const openPorts = [];
   const tw = twister();
   const scanAddress = checkPort.bind(undefined, host);
