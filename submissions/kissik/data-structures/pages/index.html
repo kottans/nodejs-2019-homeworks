@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<link rel="stylesheet" type="text/css" href="css/theme.css">
+		<script src="js/script.js"></script>
+	</head>
+	<body>
+		<div>
+			<h1>Hey!</h1>
+			<form id="myForm" method="POST">
+				<div>
+					<input type="radio" id="stack" name="type" value="stack" checked><label for="stack">stack</label>
+					<input type="radio" id="list" name="type" value="list"><label for="list">list</label>
+				</div>
+				<div>
+					<input type="radio" id="push" name="action" value="push" checked><label for="push">push</label>
+					<input type="radio" id="pop" name="action" value="pop"><label for="pop">pop</label>
+				</div>
+				<input type="text" name="item" placeholder="item" required>
+				<input type="submit" onclick="answer()" id="submit" value="push me">
+			</form>
+		</div>
+	</body>
+</html>
