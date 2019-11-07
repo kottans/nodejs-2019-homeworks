@@ -8,6 +8,7 @@
     "lint:js": "semistandard \"submissions/**/*.js\"",
     "lint-staged": "lint-staged",
     "install:void": ":",
+    "install:kissik/port-sniffer": "cd ./submissions/kissik/port-sniffer && yarn",
     "postinstall": "run-p install:**"
   },
   "repository": {
@@ -30,5 +31,10 @@
   "pre-commit": "lint-staged",
   "lint-staged": {
     "*.js": "semistandard"
+  },
+  "semistandard": {
+    "ignore": [
+      "**/node_modules/**"
+    ]
   }
 }
