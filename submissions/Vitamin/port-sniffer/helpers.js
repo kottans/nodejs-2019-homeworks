@@ -13,6 +13,7 @@ const help = `
                              
         help       Show all commands.
 `;
+
 const isDefined = value => value != null && value !== false;
 
 module.exports = { help, isDefined };
