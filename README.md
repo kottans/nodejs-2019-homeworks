@@ -13,7 +13,9 @@ instead of `npm`.
 - clone your fork to your local machine: `git clone https://github.com/YOUR_USERNAME/nodejs-2019-homeworks.git`
 - add this repository as an upstream: `git remote add upstream https://github.com/kottans/nodejs-2019-homeworks.git`
 - for every new task you're gonna submit, in your local repository:
-  - `git checkout master` and then create new branch, name it according to task performed (aka feature branch): `git checkout -b port-sniffer`. In this example feature branch is named `port-sniffer`
+  - `git checkout master && git pull upstream master && git push origin` to update your fork from the base repo
+  - `git checkout master` and then create new branch, name it according to task performed (aka feature branch): `git checkout -b port-sniffer`. In this example feature branch is named `port-sniffer`.
+    Make sure you never commit into `master` directly or you may face code conflicts.
   - add a folder with your github name under  `submissions` (if you haven't yet)
   - under your name folder, add a folder with task name and put your code in the folder
 
