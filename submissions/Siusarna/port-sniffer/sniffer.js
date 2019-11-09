@@ -123,8 +123,9 @@ const parseArgs = () => {
     objWithInputData.helpFlag = true;
   }
   const indexPort = args.indexOf('--ports');
-  if (indexPort !== -1)
+  if (indexPort !== -1) {
     objWithInputData.port = args[indexPort + 1].split('-').map(Number);
+  }
   const indexHost = args.indexOf('--host');
   if (indexHost !== -1) objWithInputData.host = args[indexHost + 1];
   return objWithInputData;
