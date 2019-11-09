@@ -1,4 +1,4 @@
-function success(res, data = null) {
+function success (res, data = null) {
   if (data) {
     res.writeHead(200, { 'Content-Type': 'application/json' });
   } else {
@@ -7,7 +7,7 @@ function success(res, data = null) {
   res.end(data);
 }
 
-function error(res, message) {
+function error (res, message) {
   res.writeHead(400, message);
   res.end();
 }

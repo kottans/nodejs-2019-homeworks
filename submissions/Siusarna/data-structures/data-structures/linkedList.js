@@ -2,7 +2,7 @@
 
 const Node = require('./Element.js');
 
-function getSuccessorNode(prevNode, successor) {
+function getSuccessorNode (prevNode, successor) {
   let successorNode = prevNode;
   if (!successor) {
     return successorNode;
@@ -19,12 +19,12 @@ function getSuccessorNode(prevNode, successor) {
 }
 
 module.exports = class LinkedList {
-  constructor() {
+  constructor () {
     this._head = null;
     this._size = 0;
   }
 
-  searchForPrevNode(inputValue) {
+  searchForPrevNode (inputValue) {
     let iteratorNode = this._head;
     while (
       iteratorNode.getNext() &&
@@ -35,7 +35,7 @@ module.exports = class LinkedList {
     return iteratorNode;
   }
 
-  insert(inputValue, successor = null) {
+  insert (inputValue, successor = null) {
     if (this._head === null) {
       this._head = new Node(inputValue);
     } else {
@@ -47,7 +47,7 @@ module.exports = class LinkedList {
     this._size += 1;
   }
 
-  remove(inputValue) {
+  remove (inputValue) {
     if (this._head.getValue() === inputValue) {
       this._head = this._head.getNext();
     } else {
@@ -61,7 +61,7 @@ module.exports = class LinkedList {
     this._size -= 1;
   }
 
-  show() {
+  show () {
     let iteratorNode = this._head;
     const allValueInList = [];
     if (this._head) {

@@ -1,24 +1,24 @@
 /* eslint-disable no-underscore-dangle */
 
 module.exports = class Node {
-  constructor(value, next = null) {
+  constructor (value, next = null) {
     this._value = value;
     this._next = next;
   }
 
-  getValue() {
+  getValue () {
     return this._value;
   }
 
-  setValue(newValue) {
+  setValue (newValue) {
     this._value = newValue;
   }
 
-  getNext() {
+  getNext () {
     return this._next;
   }
 
-  setNext(newNext) {
+  setNext (newNext) {
     this._next = newNext;
   }
 };

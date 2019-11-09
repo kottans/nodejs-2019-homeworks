@@ -1,8 +1,8 @@
-function isJSON(req) {
+function isJSON (req) {
   return req.headers['content-type'] === 'application/json';
 }
 
-function showList(res, list) {
+function showList (res, list) {
   const allNodeFromList = list.show();
   const jsonObjWithAllNode = JSON.stringify({ data: allNodeFromList });
   const result = {
@@ -12,7 +12,7 @@ function showList(res, list) {
   return result;
 }
 
-function deleteElementsFromStack(res, stack) {
+function deleteElementsFromStack (res, stack) {
   const removedValue = stack.pop();
   const jsonObjWithRemovedValue = JSON.stringify({ data: removedValue });
   const result = {
@@ -22,11 +22,11 @@ function deleteElementsFromStack(res, stack) {
   return result;
 }
 
-function isValidData(inputData) {
+function isValidData (inputData) {
   return typeof inputData === 'number' || typeof inputData === 'string';
 }
 
-function sendWrongTypeOfContentResponse() {
+function sendWrongTypeOfContentResponse () {
   const result = {
     status: 'error',
     data: 'wrong type of content'
@@ -34,7 +34,7 @@ function sendWrongTypeOfContentResponse() {
   return result;
 }
 
-function insertInList(res, list, inputData) {
+function insertInList (res, list, inputData) {
   const { data, successor } = inputData;
   if (!isValidData(data)) {
     throw new Error('wrong type of input value');
@@ -52,7 +52,7 @@ function insertInList(res, list, inputData) {
   }
 }
 
-function processOfInsertInList(res, list, inputData) {
+function processOfInsertInList (res, list, inputData) {
   const result = {};
   try {
     insertInList(res, list, inputData);
@@ -64,7 +64,7 @@ function processOfInsertInList(res, list, inputData) {
   return result;
 }
 
-function removeFromList(res, list, inputData) {
+function removeFromList (res, list, inputData) {
   const result = {};
   try {
     list.remove(inputData.data);
@@ -76,7 +76,7 @@ function removeFromList(res, list, inputData) {
   return result;
 }
 
-function pushOnStack(res, stack, inputData) {
+function pushOnStack (res, stack, inputData) {
   stack.push(inputData.data);
   const result = {
     status: 'success'
@@ -84,7 +84,7 @@ function pushOnStack(res, stack, inputData) {
   return result;
 }
 
-function notFound() {
+function notFound () {
   const result = {
     status: 'error',
     data: 'Url not found'
@@ -92,7 +92,7 @@ function notFound() {
   return result;
 }
 
-function makeStackResponse(method, stack, inputData, res) {
+function makeStackResponse (method, stack, inputData, res) {
   let result;
   if (method === 'DELETE') {
     result = deleteElementsFromStack(res, stack);
@@ -102,7 +102,7 @@ function makeStackResponse(method, stack, inputData, res) {
   return result;
 }
 
-function makeListResponse(method, list, inputData, res) {
+function makeListResponse (method, list, inputData, res) {
   let result;
   if (method === 'GET') {
     result = showList(res, list);
@@ -114,7 +114,7 @@ function makeListResponse(method, list, inputData, res) {
   return result;
 }
 
-function responseMakers(typeOfStructures, method, inputData, res, list, stack) {
+function responseMakers (typeOfStructures, method, inputData, res, list, stack) {
   let result;
   if (typeOfStructures === 'list') {
     result = makeListResponse(method, list, inputData, res);
@@ -126,7 +126,7 @@ function responseMakers(typeOfStructures, method, inputData, res, list, stack) {
   return result;
 }
 
-async function readBody(req) {
+async function readBody (req) {
   return new Promise(resolve => {
     let body = '';
     req.on('data', chunk => {
@@ -139,7 +139,7 @@ async function readBody(req) {
 }
 
 module.exports = (list, stack) => {
-  return function controller(req, res) {
+  return function controller (req, res) {
     const typeOfStructeres = req.url.substr(1);
     return new Promise(resolve => {
       if (!isJSON(req)) {
