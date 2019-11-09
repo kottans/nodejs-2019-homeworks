@@ -24,7 +24,6 @@ const getPortsRange = ports => {
   }
   // eslint-disable-next-line no-console
   console.log('Invalid ports range');
-  process.exit(1);
   return undefined;
 };
 
