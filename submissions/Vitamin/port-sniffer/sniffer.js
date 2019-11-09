@@ -22,8 +22,10 @@ const getPortsRange = ports => {
   if (isPortInRange(firstPort)) {
     return [firstPort, lastPort];
   }
+  // eslint-disable-next-line no-console
+  console.log('Invalid ports range');
   process.exit(1);
-  throw Error('Invalid ports range');
+  return undefined;
 };
 
 const tryToConnect = (host, port) => {
@@ -67,8 +69,9 @@ const parseArguments = async args => {
     !args.includes('--ports') ||
     !args.includes('--host')
   ) {
+    // eslint-disable-next-line no-console
+    console.log('Use --help to correct input');
     process.exit(1);
-    throw Error('Use --help to correct input');
   }
   const [firstPort, lastPort] = getPortsRange(args[1]);
   const host = await ipToURL(args[3]);
