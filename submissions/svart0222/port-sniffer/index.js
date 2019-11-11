@@ -2,13 +2,12 @@ const net = require('net');
 
 const checkPort = (port, host) => {
   return new Promise(resolve => {
-    let timer;
     const socket = net.createConnection(port, host, () => {
       clearTimeout(timer);
       resolve({ port, result: true });
       socket.end();
     });
-    timer = setTimeout(() => {
+    const timer = setTimeout(() => {
       resolve({ port, result: false });
       socket.end();
     }, 300);
