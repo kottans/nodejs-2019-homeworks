@@ -99,13 +99,16 @@ http
           json[key] = value;
           return x;
         });
-        if (json.type)
+        if (json.type) {
           str += `\nbefore: ${list.print(json.type)} <br> \nafter:`;
+        }
         if (json.action === 'push') list.push(json.item);
-        if (json.type === 'list' && json.action === 'pop')
+        if (json.type === 'list' && json.action === 'pop') {
           list.remove(json.item);
-        if (json.type === 'stack' && json.action === 'pop')
+        }
+        if (json.type === 'stack' && json.action === 'pop') {
           str += `\n${list.pop()} was poped`;
+        }
         if (json.type) str += list.print(json.type);
         if (str) {
           process.stdout.write(str);
