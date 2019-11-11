@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Stack/Linked list</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        html {
+            font-size: 16px;
+            font-family: sans-serif;
+        }
+        main {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .wrapper {
+            display: flex;
+            flex-flow: row wrap;
+            align-items: flex-start;
+            justify-content: center;
+        }
+        .form {
+            padding: 1rem;
+            margin: 1rem;
+            width: 100%;
+            min-width: 19rem;
+            background: lightgrey;
+            border: 1px solid gray;
+            border-radius: 5px;
+        }
+        .form__item:not(:first-child) {
+           margin-top: 1rem; 
+        }
+        .form__item {
+            display: flex;
+            justify-content: center;
+        }
+        .form__input {
+            width: 100%;
+            padding: 1rem;
+            border: 1px solid gray;
+            border-radius: 2.5px;
+            font-size: 1rem;
+        }
+        .form__button {
+            padding: 0.5rem 1rem;
+            border: 1px solid gray;
+            border-radius: 2.5px;
+            background: lightblue;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.175s linear;
+        }
+        .form__button:hover,
+        .form__button:focus {
+            background: lightskyblue;
+        }
+        .form__content {
+            text-align: center;
+        }
+        .form__answers {    
+            padding: 0;
+            list-style-type: none; 
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <div class="wrapper">
+            <form class='form' id='stack'>
+                <div class="form__controller">
+                    <div class='form__item'>
+                        <input class='form__input' type="text" name='content' placeholder="Item to stack"/>
+                    </div>
+                    <div class='form__item'>
+                        <button class='form__button js-form__button' type='button' name='push'>Push</button>
+                        <button class='form__button js-form__button' type='button' name='pop'>Pop</button>
+                    </div>
+                </div>
+                <div class="form__content">
+                    <ul class="form__answers js-form__answers">...</ul>
+                </div>
+            </form>
+            <form class='form' id='list'>
+                <div class="form__controller">
+                    <div class="form__item">
+                        <input type="text" name='content' placeholder='Item to linked list' class="form__input">
+                    </div>
+                    <div class='form__item'>
+                        <button class='form__button js-form__button' type='button' name='insert'>Insert</button>
+                        <button class='form__button js-form__button' type='button' name='remove'>Remove</button>
+                        <button class='form__button js-form__button' type='button' name='show'>Show list</button>
+                    </div>
+                </div>
+                <div class="form__content">
+                    <ul class="form__answers js-form__answers">...</ul>
+                </div>
+            </form>
+        </div>
+    </main>
+   <script>
+       const appendContent = (form, data) => {
+            const answersWrap = form.querySelector('.js-form__answers');
+            const answers = answersWrap.querySelectorAll('.js-form__answer');
+            if (!answers || !answers.length) {
+                answersWrap.removeChild(answersWrap.firstChild);
+            }
+            const answer = document.createElement('li');
+            answer.classList.add('js-form__answer');
+            const answerText = document.createTextNode(data); 
+            answer.appendChild(answerText);
+            answersWrap.appendChild(answer);
+       }    
+       const sendData = async (route, data) => {
+            try {
+                const response = await fetch(route, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data),
+
+                });
+                const result = await response.text();
+                console.log(result);
+                return result;
+            } catch (e) {
+                console.error(e);
+            }
+       }
+       const stackForm = document.getElementById('stack');
+       const stackInput = stackForm.querySelector('input');
+       const stackButtons = stackForm.querySelectorAll('button');
+       const listForm = document.getElementById('list')
+       const listInput = listForm.querySelector('input');
+       const listButtons = listForm.querySelectorAll('button');
+
+       stackButtons.forEach(button => {
+            button.addEventListener('click', async function(e) {
+                try {
+                    let result;
+                    let value = stackInput.value;
+                    if (button.name === 'pop') {
+                        result = await sendData('/stack', {
+                            type: 'stack',
+                            action: 'pop',
+                            value
+                        });
+                    } else {
+                        if (!value) {
+                            appendContent(stackForm, 'We can send data only 2 types: string and number!');
+                            return;
+                        }
+                        result = await sendData('/stack', {
+                            type: 'stack',
+                            action: button.name,
+                            value
+                        });
+                    }
+                    if (!result) {
+                        appendContent(stackForm, 'Sorry, try again later');
+                    } else {
+                        appendContent(stackForm, result);
+                        stackInput.value = '';
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+       });
+       listButtons.forEach(button => {
+            button.addEventListener('click', async (e) => {
+                try {
+                    const value = listForm.querySelector('input').value;
+                    if (!value && button.name === 'insert') {
+                        appendContent(listForm, 'We can send data only 2 types: string and number!');
+                        return;
+                    }
+                    const result = await sendData('/list', {
+                        type: 'linkedList',
+                        action: button.name,
+                        value,
+                    })
+
+                    if (!result) {
+                        appendContent(listForm, 'Sorry, try again later');
+                    } else {
+                        appendContent(listForm, result);
+                        listForm.value = '';
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            })
+       });
+   </script> 
+</body>
+</html>
