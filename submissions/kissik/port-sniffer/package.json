@@ -1,0 +1,18 @@
+{
+  "name": "port-sniffer",
+  "version": "1.0.0",
+  "description": "Tuesday, the 22nd of October, 2019   **6.3. Practice**. Port-sniffer: [Node.js 2019 homeworks](https://github.com/kissik/nodejs-2019-homeworks/tree/master/submissions/kissik/port-sniffer)   Required dependencies:   * 'commander': [npm i commander](https://www.npmjs.com/package/commander)   * 'net': [net standard module](https://nodejs.org/api/net.html)   * 'async': [npm i async](https://www.npmjs.com/package/async)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:js": "eslint index.js",
+    "lint-staged": "lint-staged"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^3.1.0",
+    "commander": "^3.0.2"
+  }
+}
