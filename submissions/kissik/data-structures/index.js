@@ -4,6 +4,45 @@ const fs = require('fs');
 
 const port = process.env.PORT || 3210;
 
+const page404 = {
+  path: 'pages/404.html',
+  type: { 'Content-Type': 'text/html' },
+  verb: 404
+};
+
+const action = {
+  type: { 'Content-Type': 'text/html' },
+  verb: 200
+};
+
+const contentType = {
+  '/': {
+    path: 'pages/index.html',
+    type: { 'Content-Type': 'text/html' },
+    verb: 200
+  },
+  '/css/theme.css': {
+    path: 'css/theme.css',
+    type: { 'Content-Type': 'text/css' },
+    verb: 200
+  },
+  '/img/binoculars.jpg': {
+    path: 'img/binoculars.jpg',
+    type: { 'Content-Type': 'image/jpeg' },
+    verb: 200
+  }
+};
+
+const makeHTML = data => {
+  return `<html><head>
+                    <link rel="stylesheet" type="text/css" href="css/theme.css">
+                    </head>
+                    <body><h1>Your data structure:</h1>
+                    <p class="answer">${data}</p>
+                    <a href='/'>return</a>
+            </body></html>`;
+};
+
 const list = {};
 
 list.data = {};
@@ -16,15 +55,14 @@ list.push = data => {
 };
 
 list.pop = () => {
-  const a = list.data.item ? list.data.item : 'none';
+  const itemValue = list.data.item ? list.data.item : 'none';
   if (list.data) list.data = list.data.next;
-  return a;
+  return itemValue;
 };
 
 list.print = msg => {
   let a = list.data;
-  let str = '';
-  str += `\nThe ${msg}:\n`;
+  let str = `\nThe ${msg}:\n`;
   while (a && a.item) {
     str += `${a.item} -> `;
     a = a.next;
@@ -37,74 +75,50 @@ list.remove = data => {
   let next;
   if (a.next) next = a.next;
   if (a.item === data) list.data = a.next;
-  while (next && next.item !== data) {
-    next = next.next;
-    a = a.next;
+  else {
+    while (next && next.item !== data) {
+      next = next.next;
+      a = a.next;
+    }
+    if (next && next.item === data) a.next = next.next;
   }
-  if (next && next.item === data) a.next = next.next;
 };
 
 http
   .createServer((req, res) => {
-    if (req.url === '/') {
-      res.writeHead(200, { 'Content-Type': 'text/html' });
-      fs.createReadStream('pages/index.html').pipe(res);
-    } else if (req.url === '/css/theme.css') {
-      res.writeHead(200, { 'Content-Type': 'text/css' });
-      fs.createReadStream('css/theme.css').pipe(res);
-    } else if (req.url === '/img/binoculars.jpg') {
-      res.writeHead(200, { 'Content-Type': 'image/jpeg' });
-      fs.createReadStream('img/binoculars.jpg').pipe(res);
-    } else if (req.url === '/js/script.js') {
-      res.writeHead(200, { 'Content-Type': 'application/js' });
-      fs.createReadStream('js/script.js').pipe(res);
-    } else {
-      res.writeHead(404, { 'Content-Type': 'text/html' });
-      fs.createReadStream('pages/404.html').pipe(res);
-    }
-
     let body = [];
-
     req
       .on('data', chunk => body.push(chunk))
       .on('end', () => {
-        body = body.toString().split('&');
         const json = {};
         let str = '';
+        body = body.toString().split('&');
         body.map(x => {
           const key = x.split('=')[0];
           const value = x.split('=')[1];
           json[key] = value;
           return x;
         });
-
-        if (json.action === 'push') {
-          str += `\nbefore: ${
-            json.type === 'list' ? list.print('list') : list.print('stack')
-          } <br> \nafter:`;
-          list.push(json.item);
-          str +=
-            json.type === 'list' ? list.print('list') : list.print('stack');
-        }
-        if (json.type === 'list' && json.action === 'pop') {
-          str += `\nbefore: ${list.print('list')} <br> \nafter:`;
+        if (json.type)
+          str += `\nbefore: ${list.print(json.type)} <br> \nafter:`;
+        if (json.action === 'push') list.push(json.item);
+        if (json.type === 'list' && json.action === 'pop')
           list.remove(json.item);
-          str += list.print('list');
-        }
-        if (json.type === 'stack' && json.action === 'pop') {
-          str += `\nbefore: ${list.print('stack')} <br> \nafter:`;
+        if (json.type === 'stack' && json.action === 'pop')
           str += `\n${list.pop()} was poped`;
-          str += list.print('stack');
+        if (json.type) str += list.print(json.type);
+        if (str) {
+          process.stdout.write(str);
+          res.writeHead(action.verb, action.type);
+          res.end(makeHTML(str));
         }
-        process.stdout.write(str);
-        if (str)
-          res.end(`<html><head>
-                    <link rel="stylesheet" type="text/css" href="css/theme.css">
-                    </head>
-                    <body><h1>Your data structure:</h1>
-                    <p class="answer">${str}</p>
-                    <a href='/'>return</a>
-            </body></html>`);
       });
+    res.writeHead(
+      contentType[req.url] ? contentType[req.url].verb : page404.verb,
+      contentType[req.url] ? contentType[req.url].type : page404.type
+    );
+    fs.createReadStream(
+      contentType[req.url] ? contentType[req.url].path : page404.path
+    ).pipe(res);
   })
   .listen(port);
