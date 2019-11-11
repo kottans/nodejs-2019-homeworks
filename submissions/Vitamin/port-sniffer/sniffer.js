@@ -5,10 +5,10 @@ const { help, isDefined } = require('./helpers');
 const [, , ...processArgs] = process.argv;
 const [minPortValue, maxPortValue] = [0, 65535];
 
-const ipToURL = async host => {
+const ipFromHostname = async host => {
   try {
     const result = await dns.lookup(host);
-    return await result.address;
+    return result.address;
   } catch (err) {
     throw Error('Invalid host');
   }
@@ -16,15 +16,14 @@ const ipToURL = async host => {
 
 const isPortInRange = port => port >= minPortValue && port <= maxPortValue;
 
+// eslint-disable-next-line consistent-return
 const getPortsRange = ports => {
   const [firstPort, last] = ports.split('-');
   const lastPort = isPortInRange(last) ? last : firstPort;
   if (isPortInRange(firstPort)) {
     return [firstPort, lastPort];
   }
-  // eslint-disable-next-line no-console
   console.log('Invalid ports range');
-  return undefined;
 };
 
 const tryToConnect = (host, port) => {
@@ -39,11 +38,11 @@ const tryToConnect = (host, port) => {
     });
     client.on('timeout', () => {
       client.destroy();
-      return resolve(false);
+      return resolve(null);
     });
     client.on('error', () => {
       client.destroy();
-      return resolve(false);
+      return resolve(null);
     });
   });
 };
@@ -60,7 +59,6 @@ const getOpenedPorts = async ({ host, firstPort, lastPort }) => {
 
 const parseArguments = async args => {
   if (args.includes('--help')) {
-    // eslint-disable-next-line no-console
     console.log(help);
     process.exit(0);
   } else if (
@@ -68,12 +66,11 @@ const parseArguments = async args => {
     !args.includes('--ports') ||
     !args.includes('--host')
   ) {
-    // eslint-disable-next-line no-console
     console.log('Use --help to correct input');
     process.exit(1);
   }
   const [firstPort, lastPort] = getPortsRange(args[1]);
-  const host = await ipToURL(args[3]);
+  const host = await ipFromHostname(args[3]);
   return { host, firstPort, lastPort };
 };
 
@@ -96,5 +93,4 @@ const sniff = async args => {
 
 sniff(processArgs)
   .then(getMessageToLog)
-  // eslint-disable-next-line no-console
   .then(console.log);
