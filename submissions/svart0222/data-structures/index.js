@@ -6,7 +6,7 @@ const LikedList = require('./structures/LinkedList');
 const stack = new Stack();
 const linkedList = new LikedList();
 
-const server = http.createServer(function create(req, res) {
+const server = http.createServer(function create (req, res) {
   if (req.url === '/') {
     fs.readFile(`${__dirname}/index.html`, (err, data) => {
       if (err) throw err;

@@ -1,9 +1,9 @@
 class LinkedList {
-  constructor() {
+  constructor () {
     this.head = null;
   }
 
-  addNode(value) {
+  addNode (value) {
     const node = {
       next: this.head,
       value
@@ -20,7 +20,7 @@ class LinkedList {
     };
   }
 
-  removeNode(value) {
+  removeNode (value) {
     let current = this.head;
     let prev = null;
 
@@ -40,7 +40,7 @@ class LinkedList {
     return null;
   }
 
-  showNode(obj) {
+  showNode (obj) {
     if (!obj) {
       return null;
     }
@@ -56,7 +56,7 @@ class LinkedList {
     return result;
   }
 
-  showNodes() {
+  showNodes () {
     const result = this.showNode(this.head);
     return result;
   }

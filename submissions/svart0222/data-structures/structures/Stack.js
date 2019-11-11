@@ -1,13 +1,13 @@
 class Stack {
-  constructor() {
+  constructor () {
     this.items = [];
   }
 
-  push(item) {
+  push (item) {
     this.items.push(item);
   }
 
-  pop() {
+  pop () {
     this.items.pop();
   }
 }
