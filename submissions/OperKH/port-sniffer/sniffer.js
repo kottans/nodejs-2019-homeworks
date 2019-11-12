@@ -11,12 +11,6 @@ function printSuccess (message) {
 }
 
 function getParamsFromArguments () {
-  if (process.argv.includes('--help')) {
-    printSuccessHelp();
-  }
-  if (!process.argv.includes('--host')) {
-    printFatal('Host is required, e.g. "--host 8.8.8.8"');
-  }
   return process.argv
     .slice(2)
     .join(' ')
@@ -24,44 +18,50 @@ function getParamsFromArguments () {
     .reduce(function (acc, str) {
       if (!str) return acc;
       const [key, value] = str.split(' ');
-      switch (key) {
-        case 'help':
-          break;
-        case 'host':
-          if (!value) {
-            printFatal('Host value must be provided, e.g. "--host 8.8.8.8"');
-          }
-          acc[key] = value;
-          break;
-        case 'ports':
-          if (!value) {
-            printFatal('Ports value must be provided, e.g. "--ports 300-1024"');
-          }
-          if (!value.includes('-')) {
-            printFatal('Ports format invalid, must be e.g. "--ports 300-1024"');
-          } else {
-            const [startPort, endPort] = value.split('-').map(port => parseInt(port, 10));
-            if (isNaN(startPort) || startPort < 0) {
-              printFatal('Start port format invalid');
-            }
-            if (isNaN(endPort) || endPort < 0) {
-              printFatal('End port format invalid');
-            }
-            if (endPort > 65535) {
-              printFatal('End port must be between 0-65535');
-            }
-            if (startPort > endPort) {
-              printFatal('End port must be bigger then start port');
-            }
-            acc.startPort = startPort;
-            acc.endPort = endPort;
-          }
-          break;
-        default:
-          acc[key] = value;
+
+      if (key === 'ports' && value) {
+        acc.ports = value.split('-').map(port => parseInt(port, 10));
+      } else {
+        acc[key] = value;
       }
+
       return acc;
     }, {});
+}
+
+function validateParams (params) {
+  if (Object.hasOwnProperty.call(params, 'help')) {
+    printSuccessHelp();
+  }
+
+  if (!Object.hasOwnProperty.call(params, 'host')) {
+    printFatal('Host is required, e.g. "--host 8.8.8.8"');
+  }
+  if (!params.host) {
+    printFatal('Host value must be provided, e.g. "--host 8.8.8.8"');
+  }
+
+  if (Object.hasOwnProperty.call(params, 'ports')) {
+    if (!params.ports) {
+      printFatal('Ports value must be provided, e.g. "--ports 300-1024"');
+    }
+    if (!Array.isArray(params.ports) || params.ports.length !== 2) {
+      printFatal('Ports format invalid, must be e.g. "--ports 300-1024"');
+    }
+    const [startPort, endPort] = params.ports;
+    if (isNaN(startPort) || startPort < 0) {
+      printFatal('Start port format invalid');
+    }
+    if (isNaN(endPort) || endPort < 0) {
+      printFatal('End port format invalid');
+    }
+    if (endPort > 65535) {
+      printFatal('End port must be between 0-65535');
+    }
+    if (startPort > endPort) {
+      printFatal('End port must be bigger then start port');
+    }
+  }
 }
 
 function printSuccessHelp () {
@@ -88,21 +88,21 @@ EXAMPLES
 }
 
 function sniffConnectionAvailabilityAsync (port, host) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function (resolve) {
     const socket = new net.Socket();
     socket.setTimeout(300);
 
     socket.on('connect', function () {
       socket.destroy();
-      resolve();
+      resolve(true);
     });
     socket.on('timeout', function () {
       socket.destroy();
-      reject(new Error('timeout'));
+      resolve(false);
     });
-    socket.on('error', function (err) {
+    socket.on('error', function () {
       socket.destroy();
-      reject(err);
+      resolve(false);
     });
 
     socket.connect(port, host);
@@ -113,16 +113,19 @@ async function scanAsync (host, port, portLimit, availablePorts = []) {
   if (port > portLimit) {
     return availablePorts;
   }
-  try {
-    await sniffConnectionAvailabilityAsync(port, host);
+  const isPortOpen = await sniffConnectionAvailabilityAsync(port, host);
+  if (isPortOpen) {
     process.stdout.write('.');
     availablePorts.push(port);
-  } catch (e) {}
+  }
   return scanAsync(host, port + 1, portLimit, availablePorts);
 }
 
 (async function () {
-  const { host, startPort = 0, endPort = 65535 } = getParamsFromArguments();
+  const params = getParamsFromArguments();
+  validateParams(params);
+  const { host, ports = [] } = params;
+  const [startPort = 0, endPort = 65535] = ports;
   const openedPorts = await scanAsync(host, startPort, endPort);
   const result = openedPorts.length ? `\n${openedPorts.join(',')} ports are opened` : `\nNo open ports on host: ${host}`;
   printSuccess(result);
