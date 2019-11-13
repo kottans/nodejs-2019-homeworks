@@ -1,11 +1,13 @@
+const mapLimit = require('async/mapLimit');
 const net = require('net');
 const dns = require('dns');
 const args = require('minimist')(process.argv.slice(2));
 const range = findPortsRange();
 
 const ports = {
-  firstPort: +range[0],
-  lastPort: +range[1] ? +range[1] : +range[0],
+  portList: fillArrayRange((range[1] - range[0]) + 1, range[0]),
+  firstPort: range[0],
+  lastPort: range[1] ? range[1] : range[0],
   openedPorts: []
 };
 
@@ -19,7 +21,7 @@ const openedPortCheck = (host, port, checkCallback) => {
   socket.on('connect', () => {
     clearTimeout(time);
     socket.destroy();
-    process.stdout.write('.');
+    console.log('.');
     ports.openedPorts.push(port);
     checkCallback(true);
   });
@@ -31,24 +33,26 @@ const openedPortCheck = (host, port, checkCallback) => {
 
 const showResult = host => {
   if (args.help) {
-    process.stdout.write(messages().help);
-    process.exit(1);
+    console.table(messages().help);
+    return false;
   }
   if (!args.host) {
-    process.stdout.write(messages().noHost);
-    process.exit(1);
+    return false;
   } else {
-    openedPortCheck(host, ports.firstPort, function nextIteration () {
-      if (ports.firstPort === ports.lastPort) {
-        if (ports.openedPorts.length) {
-          process.stdout.write(messages(ports.openedPorts.join()).openedPorts);
-          process.exit();
-        } else {
-          process.stdout.write(messages().portsNotFound);
-          process.exit(1);
+    mapLimit(ports.portList, 10, async currentPort => {
+      await openedPortCheck(host, currentPort, () => {
+        if (currentPort === ports.lastPort) {
+          if (ports.openedPorts.length) {
+            console.table(
+              messages(ports.openedPorts.join()).openedPorts
+            );
+            process.exit(0);
+          } else {
+            console.table(messages().portsNotFound);
+            return false;
+          }
         }
-      }
-      openedPortCheck(host, ++ports.firstPort, nextIteration);
+      });
     });
   }
 };
@@ -56,13 +60,13 @@ const showResult = host => {
 function findPortsRange () {
   if (args.ports) {
     if (args.ports.length) {
-      return args.ports.toString().split('-');
+      return args.ports.split('-').map(Number);
     } else {
-      process.stdout.write(messages().emptyPortsParameter);
-      process.exit(1);
+      console.table(messages().emptyPortsParameter);
+      return false;
     }
   } else {
-    return ['0', '65535'];
+    return [0, 65535];
   }
 }
 
@@ -81,6 +85,10 @@ function messages (openedPortsNumbers) {
   };
 }
 
+function fillArrayRange (arrLength, firstVal) {
+  return Array.from(new Array(arrLength), (_, i) => (i + firstVal));
+}
+
 const ipLookup = () => {
   return new Promise((resolve, reject) => {
     dns.lookup(args.host, (err, address) => {
@@ -92,4 +100,4 @@ const ipLookup = () => {
 
 ipLookup()
   .then(res => showResult(res))
-  .catch(() => process.stdout.write('Adress not found'));
+  .catch(() => console.table('Adress not found'));
