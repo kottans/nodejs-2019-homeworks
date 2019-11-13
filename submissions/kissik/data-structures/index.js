@@ -7,29 +7,31 @@ const port = process.env.PORT || 3210;
 const page404 = {
   path: 'pages/404.html',
   type: { 'Content-Type': 'text/html' },
-  verb: 404
+  responseCode: 404
 };
+
+const OK = 200;
 
 const action = {
   type: { 'Content-Type': 'text/html' },
-  verb: 200
+  responseCode: OK
 };
 
 const contentType = {
   '/': {
     path: 'pages/index.html',
     type: { 'Content-Type': 'text/html' },
-    verb: 200
+    responseCode: OK
   },
   '/css/theme.css': {
     path: 'css/theme.css',
     type: { 'Content-Type': 'text/css' },
-    verb: 200
+    responseCode: OK
   },
   '/img/binoculars.jpg': {
     path: 'img/binoculars.jpg',
     type: { 'Content-Type': 'image/jpeg' },
-    verb: 200
+    responseCode: OK
   }
 };
 
@@ -41,6 +43,20 @@ const makeHTML = data => {
                     <p class="answer">${data}</p>
                     <a href='/'>return</a>
             </body></html>`;
+};
+
+const parse = body => {
+  const json = {};
+  body
+    .toString()
+    .split('&')
+    .map(item => {
+      const key = item.split('=')[0];
+      const value = item.split('=')[1];
+      json[key] = value;
+      return item;
+    });
+  return json;
 };
 
 const list = {};
@@ -55,50 +71,43 @@ list.push = data => {
 };
 
 list.pop = () => {
-  const itemValue = list.data.item ? list.data.item : 'none';
+  const itemValue = list.data.item ? list.data.item : undefined;
   if (list.data) list.data = list.data.next;
   return itemValue;
 };
 
 list.print = msg => {
-  let a = list.data;
+  let listData = list.data;
   let str = `\nThe ${msg}:\n`;
-  while (a && a.item) {
-    str += `${a.item} -> `;
-    a = a.next;
+  while (listData && listData.item) {
+    str += `${listData.item} -> `;
+    listData = listData.next;
   }
   return str;
 };
 
-list.remove = data => {
-  let a = list.data;
+list.remove = item => {
+  let listData = list.data;
   let next;
-  if (a.next) next = a.next;
-  if (a.item === data) list.data = a.next;
+  if (listData.next) next = listData.next;
+  if (listData.item === item) list.data = listData.next;
   else {
-    while (next && next.item !== data) {
+    while (next && next.item !== item) {
       next = next.next;
-      a = a.next;
+      listData = listData.next;
     }
-    if (next && next.item === data) a.next = next.next;
+    if (next && next.item === item) listData.next = next.next;
   }
 };
 
 http
   .createServer((req, res) => {
-    let body = [];
+    const body = [];
     req
       .on('data', chunk => body.push(chunk))
       .on('end', () => {
-        const json = {};
         let str = '';
-        body = body.toString().split('&');
-        body.map(x => {
-          const key = x.split('=')[0];
-          const value = x.split('=')[1];
-          json[key] = value;
-          return x;
-        });
+        const json = parse(body);
         if (json.type) {
           str += `\nbefore: ${list.print(json.type)} <br> \nafter:`;
         }
@@ -112,16 +121,12 @@ http
         if (json.type) str += list.print(json.type);
         if (str) {
           process.stdout.write(str);
-          res.writeHead(action.verb, action.type);
+          res.writeHead(action.responseCode, action.type);
           res.end(makeHTML(str));
         }
       });
-    res.writeHead(
-      contentType[req.url] ? contentType[req.url].verb : page404.verb,
-      contentType[req.url] ? contentType[req.url].type : page404.type
-    );
-    fs.createReadStream(
-      contentType[req.url] ? contentType[req.url].path : page404.path
-    ).pipe(res);
+    const { responseCode, type, path } = contentType[req.url] || page404;
+    res.writeHead(responseCode, type);
+    fs.createReadStream(path).pipe(res);
   })
   .listen(port);
