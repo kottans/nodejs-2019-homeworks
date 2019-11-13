@@ -74,6 +74,7 @@ list.push = data => {
 };
 
 list.pop = () => {
+  if (!list.data) return undefined;
   const itemValue = list.data.item ? list.data.item : undefined;
   if (list.data) list.data = list.data.next;
   return itemValue;
@@ -104,31 +105,40 @@ list.remove = item => {
   }
 };
 
+const resolve = json => {
+  let str = '';
+  if (json.type) {
+    str += `\nbefore: ${list.print(json.type)} <br> \nafter:`;
+  }
+  if (json.action === 'push') list.push(json.item);
+  if (json.type === 'list' && json.action === 'pop') {
+    list.remove(json.item);
+  }
+  if (json.type === 'stack' && json.action === 'pop') {
+    str += `\n${list.pop()} was poped`;
+  }
+  if (json.type) str += list.print(json.type);
+  return str;
+};
+
+async function manageRequest(req, res) {
+  const body = [];
+  req
+    .on('data', chunk => body.push(chunk))
+    .on('end', () => {
+      const json = parse(body);
+      const str = resolve(json);
+      if (str) {
+        process.stdout.write(str);
+        res.writeHead(action.responseCode, action.type);
+        res.end(makeHTML(str));
+      }
+    });
+}
+
 http
-  .createServer((req, res) => {
-    const body = [];
-    req
-      .on('data', chunk => body.push(chunk))
-      .on('end', () => {
-        let str = '';
-        const json = parse(body);
-        if (json.type) {
-          str += `\nbefore: ${list.print(json.type)} <br> \nafter:`;
-        }
-        if (json.action === 'push') list.push(json.item);
-        if (json.type === 'list' && json.action === 'pop') {
-          list.remove(json.item);
-        }
-        if (json.type === 'stack' && json.action === 'pop') {
-          str += `\n${list.pop()} was poped`;
-        }
-        if (json.type) str += list.print(json.type);
-        if (str) {
-          process.stdout.write(str);
-          res.writeHead(action.responseCode, action.type);
-          res.end(makeHTML(str));
-        }
-      });
+  .createServer(async (req, res) => {
+    await manageRequest(req, res);
     const { responseCode, type, path } = contentType[req.url] || page404;
     res.writeHead(responseCode, type);
     fs.createReadStream(path).pipe(res);
