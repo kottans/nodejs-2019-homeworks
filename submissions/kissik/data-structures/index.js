@@ -121,7 +121,7 @@ const resolve = json => {
   return str;
 };
 
-async function manageRequest(req, res) {
+async function manageRequest (req, res) {
   const body = [];
   req
     .on('data', chunk => body.push(chunk))
