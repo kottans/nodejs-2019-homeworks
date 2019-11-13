@@ -4,17 +4,20 @@ const fs = require('fs');
 
 const port = process.env.PORT || 3210;
 
+const STATUS_CODES = {
+  OK: 200,
+  NOT_FOUND: 404
+};
+
 const page404 = {
   path: 'pages/404.html',
   type: { 'Content-Type': 'text/html' },
-  responseCode: 404
+  responseCode: STATUS_CODES.NOT_FOUND
 };
-
-const OK = 200;
 
 const action = {
   type: { 'Content-Type': 'text/html' },
-  responseCode: OK
+  responseCode: STATUS_CODES.OK
 };
 
 const paths = {
@@ -26,17 +29,17 @@ const contentType = {
   '/': {
     path: 'pages/index.html',
     type: { 'Content-Type': 'text/html' },
-    responseCode: OK
+    responseCode: STATUS_CODES.OK
   },
   [`/${paths.css}`]: {
     path: paths.css,
     type: { 'Content-Type': 'text/css' },
-    responseCode: OK
+    responseCode: STATUS_CODES.OK
   },
   [`/${paths.jpg}`]: {
     path: paths.jpg,
     type: { 'Content-Type': 'image/jpeg' },
-    responseCode: OK
+    responseCode: STATUS_CODES.OK
   }
 };
 
