@@ -17,19 +17,24 @@ const action = {
   responseCode: OK
 };
 
+const paths = {
+  css: 'css/theme.css',
+  jpg: 'img/binoculars.jpg'
+};
+
 const contentType = {
   '/': {
     path: 'pages/index.html',
     type: { 'Content-Type': 'text/html' },
     responseCode: OK
   },
-  '/css/theme.css': {
-    path: 'css/theme.css',
+  [`/${paths.css}`]: {
+    path: paths.css,
     type: { 'Content-Type': 'text/css' },
     responseCode: OK
   },
-  '/img/binoculars.jpg': {
-    path: 'img/binoculars.jpg',
+  [`/${paths.jpg}`]: {
+    path: paths.jpg,
     type: { 'Content-Type': 'image/jpeg' },
     responseCode: OK
   }
@@ -46,16 +51,11 @@ const makeHTML = data => {
 };
 
 const parse = body => {
-  const json = {};
-  body
+  const entries = body
     .toString()
     .split('&')
-    .map(item => {
-      const key = item.split('=')[0];
-      const value = item.split('=')[1];
-      json[key] = value;
-      return item;
-    });
+    .map(bodyValue => bodyValue.split('='));
+  const json = Object.fromEntries(entries);
   return json;
 };
 
