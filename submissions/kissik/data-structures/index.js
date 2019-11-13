@@ -88,6 +88,7 @@ list.print = msg => {
 
 list.remove = item => {
   let listData = list.data;
+  if (listData === undefined) return;
   let next;
   if (listData.next) next = listData.next;
   if (listData.item === item) list.data = listData.next;
