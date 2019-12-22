@@ -30,7 +30,7 @@ module.exports.getWeather = async function (mode, location, units) {
 function makeWeatherData (data, name) {
   const day = {
     icon: '_' + data.weather[0].icon,
-    city = name,
+    city: name,
     date: new Date(data.dt * 1000),
     description: data.weather[0].description,
     temp: data.main.temp,
