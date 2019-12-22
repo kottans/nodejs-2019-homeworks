@@ -4,11 +4,9 @@ const fs = require('fs');
 
 function saveRecent (city) {
   const recent = readRecent();
-  if (recent.indexOf(city) === -1) {
-    recent.unshift(city);
-    if (recent.lenght > 9) recent.pop();
-    writeRecent(recent);
-  }
+  if(recent.includes(city)) return;
+  recent.unshift(city);
+  writeRecent(recent.slice(0, 10));
 }
 
 function saveFavorite (city) {
@@ -25,26 +23,22 @@ function saveFavorite (city) {
 }
 
 function readFavorite () {
-  if (fs.existsSync('favorite.csv')) {
-    const output = fs.readFileSync('favorite.csv').toString()
-      .split('\n')
-      .map(c => {
-        const cData = c.split(';');
-        return {
-          name: cData[0],
-          count: cData[1]
-        };
-      });
-    return output;
-  }
-
-  return [];
+  if (!fs.existsSync('favorite.csv')) return [];
+  
+  const output = fs.readFileSync('favorite.csv').toString()
+    .split('\n')
+    .map(c => {
+      const cData = c.split(';');
+      return {
+        name: cData[0],
+        count: cData[1]
+      };
+    });
+  return output;
 }
 
 function writeFavorite (favorite) {
-  fs.writeFile('favorite.csv', favorite.map(c => {
-    return `${c.name};${c.count}`;
-  }).join('\n'), () => {});
+  fs.writeFile('favorite.csv', favorite.map(c => `${c.name};${c.count}`).join('\n'), () => {});
 }
 
 function readRecent () {

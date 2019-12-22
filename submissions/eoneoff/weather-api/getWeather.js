@@ -18,22 +18,19 @@ module.exports.getWeather = async function (mode, location, units) {
   })).data;
   const wData = [];
   if (mode === 'weather') {
-    const dData = makeWeatherData(data);
-    dData.city = data.name;
-    wData.push(dData);
+    wData.push(makeWeatherData(data, data.name));
   } else {
     for (const day of data.list) {
-      const dData = makeWeatherData(day);
-      dData.city = data.city.name;
-      wData.push(dData);
+      wData.push(makeWeatherData(day, data.city.name));
     }
   }
   return wData;
 };
 
-function makeWeatherData (data) {
+function makeWeatherData (data, name) {
   const day = {
     icon: '_' + data.weather[0].icon,
+    city = name,
     date: new Date(data.dt * 1000),
     description: data.weather[0].description,
     temp: data.main.temp,

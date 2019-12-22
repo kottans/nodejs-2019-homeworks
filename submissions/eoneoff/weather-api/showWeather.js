@@ -19,10 +19,10 @@ function dayBlock (data, tUnit, wUnit) {
       'top-mid': '─',
       'bottom-mid': '─',
       'left-mid': '',
-      mid: '',
+      'mid': '',
       'mid-mid': '',
       'right-mid': '',
-      middle: ' '
+      'middle': ' '
     },
     colWidths: [17, 40]
   });
@@ -60,7 +60,8 @@ module.exports.showWeather = function showWeather (mode, location, units) {
       data.name);
     saveCities(location);
   }).catch(error => {
-    if ((error.response.data || {}).message === 'city not found' || (error.response.data || {}).message === 'Nothing to geocode') {
+    const message = (error.response.data || {}).message;
+    if (message === 'city not found' || message === 'Nothing to geocode') {
       wrongCity(location).then(c => showWeather(mode, c, units));
     } else throw (error);
   });
