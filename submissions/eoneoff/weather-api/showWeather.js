@@ -19,10 +19,10 @@ function dayBlock (data, tUnit, wUnit) {
       'top-mid': '─',
       'bottom-mid': '─',
       'left-mid': '',
-      'mid': '',
+      mid: '',
       'mid-mid': '',
       'right-mid': '',
-      'middle': ' '
+      middle: ' '
     },
     colWidths: [17, 40]
   });
