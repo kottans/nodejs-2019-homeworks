@@ -4,7 +4,7 @@ const fs = require('fs');
 
 function saveRecent (city) {
   const recent = readRecent();
-  if(recent.includes(city)) return;
+  if (recent.includes(city)) return;
   recent.unshift(city);
   writeRecent(recent.slice(0, 10));
 }
@@ -24,7 +24,7 @@ function saveFavorite (city) {
 
 function readFavorite () {
   if (!fs.existsSync('favorite.csv')) return [];
-  
+
   const output = fs.readFileSync('favorite.csv').toString()
     .split('\n')
     .map(c => {
